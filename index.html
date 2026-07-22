@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 Jour, 1 Région</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16324f;
+    --parchment:#f1e9d8;
+    --parchment-2:#e8dcc2;
+    --brass:#b9862f;
+    --teal:#2f5d62;
+    --charcoal:#221f1f;
+    --danger:#8c3b3b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.04), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,255,255,0.03), transparent 40%);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px 60px;
+    font-family:'Source Serif 4', Georgia, serif;
+    color:var(--charcoal);
+  }
+  .wrap{
+    width:100%;
+    max-width:720px;
+  }
+  .masthead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:var(--parchment);
+    margin-bottom:18px;
+    padding:0 6px;
+    gap:12px;
+  }
+  .masthead .title{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    font-weight:600;
+    opacity:0.85;
+  }
+  .masthead-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .masthead .date{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.05em;
+    opacity:0.65;
+    text-transform:capitalize;
+  }
+  .edit-toggle{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:transparent;
+    border:1px solid rgba(241,233,216,0.4);
+    color:var(--parchment);
+    padding:7px 12px;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background 0.15s ease, border-color 0.15s ease;
+    white-space:nowrap;
+  }
+  .edit-toggle:hover{
+    border-color:var(--brass);
+  }
+  .edit-toggle.active{
+    background:var(--brass);
+    border-color:var(--brass);
+    color:var(--charcoal);
+  }
+
+  .card{
+    position:relative;
+    background:var(--parchment);
+    border-radius:2px;
+    box-shadow:0 30px 60px -25px rgba(0,0,0,0.55), 0 2px 0 rgba(0,0,0,0.15) inset;
+    overflow:hidden;
+    border:1px solid rgba(0,0,0,0.08);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+    opacity:0.5;
+  }
+
+  .stamp{
+    position:absolute;
+    top:22px;
+    right:22px;
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    border:2px solid var(--brass);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(9deg);
+    color:var(--brass);
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    z-index:3;
+    background:rgba(241,233,216,0.5);
+    mix-blend-mode:multiply;
+  }
+  .stamp::before{
+    content:"";
+    position:absolute;
+    inset:6px;
+    border:1px dashed var(--brass);
+    border-radius:50%;
+  }
+  .stamp .day-num{
+    font-size:24px;
+    font-weight:600;
+    line-height:1;
+  }
+  .stamp .day-label{
+    font-size:8px;
+    margin-top:2px;
+  }
+
+  .content{
+    position:relative;
+    padding:34px 34px 30px;
+  }
+  .content-top{
+    display:flex;
+    gap:26px;
+    align-items:flex-start;
+    margin-bottom:22px;
+  }
+  .text-block{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .side-media{
+    flex:0 0 190px;
+    width:190px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:90px;
+  }
+  .flag-box{
+    position:relative;
+    width:100%;
+    height:84px;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.25);
+    background:var(--parchment-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+  }
+  .flag-box img,
+  .flag-box .flag-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .flag-caption{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    background:linear-gradient(transparent, rgba(0,0,0,0.55));
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:12px 10px 6px;
+    text-align:center;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:repeating-linear-gradient(90deg, var(--teal) 0 4px, transparent 4px 8px);
+    opacity:0.5;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(28px, 5vw, 42px);
+    line-height:1.05;
+    margin:0 0 6px;
+    max-width:75%;
+  }
+  .country-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    letter-spacing:0.04em;
+    color:var(--ink);
+    opacity:0.75;
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .desc{
+    font-size:17px;
+    line-height:1.65;
+    color:var(--charcoal);
+    margin-bottom:0;
+  }
+
+  .landscape-frame{
+    width:100%;
+    height:160px;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.25);
+    margin-bottom:0;
+    background:var(--parchment-2);
+    position:relative;
+  }
+  .landscape-frame img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .landscape-caption{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    background:linear-gradient(transparent, rgba(0,0,0,0.55));
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:16px 12px 8px;
+  }
+
+  .map-frame{
+    position:relative;
+    height:280px;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.25);
+    background:var(--parchment-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .map-row{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .map-row .map-frame{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .extra-photos{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    flex:0 0 190px;
+    width:190px;
+  }
+  .extra-photo-frame{
+    position:relative;
+    width:100%;
+    height:160px;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.25);
+    background:var(--parchment-2);
+  }
+  .extra-photo-frame img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .extra-photo-caption{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    background:linear-gradient(transparent, rgba(0,0,0,0.55));
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:16px 12px 8px;
+  }
+  .map-frame img.custom-map{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .map-frame .map-placeholder{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.4;
+  }
+  .map-frame::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    box-shadow:inset 0 0 30px rgba(22,50,79,0.25);
+  }
+
+  .footer-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:20px 34px 26px;
+    background:var(--parchment-2);
+    border-top:1px solid rgba(22,50,79,0.12);
+    position:relative;
+  }
+  .progress{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink);
+    opacity:0.65;
+  }
+  button.explore{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--parchment);
+    border:none;
+    padding:12px 20px;
+    border-radius:2px;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  button.explore:hover{
+    background:var(--teal);
+  }
+  button.explore:active{
+    transform:scale(0.97);
+  }
+  button.explore:focus-visible{
+    outline:2px solid var(--brass);
+    outline-offset:2px;
+  }
+
+  /* Edit panel */
+  .edit-panel{
+    display:none;
+    background:var(--parchment-2);
+    border-top:2px dashed rgba(22,50,79,0.25);
+    padding:24px 34px 28px;
+  }
+  .edit-panel.visible{
+    display:block;
+  }
+  .edit-panel-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink);
+    margin-bottom:16px;
+    opacity:0.8;
+  }
+  .edit-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+  }
+  .edit-slot{
+    background:var(--parchment);
+    border:1px dashed rgba(22,50,79,0.3);
+    border-radius:2px;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-align:center;
+  }
+  .edit-slot-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.7;
+  }
+  .edit-slot.drag-over{
+    border-color:var(--brass);
+    background:rgba(185,134,47,0.08);
+  }
+  .edit-slot-preview{
+    width:100%;
+    height:80px;
+    border-radius:2px;
+    background:var(--parchment-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.15);
+    pointer-events:none;
+  }
+  .edit-slot-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .edit-slot-preview .placeholder{
+    font-size:11px;
+    color:var(--ink);
+    opacity:0.4;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .edit-slot-buttons{
+    display:flex;
+    gap:6px;
+    width:100%;
+  }
+  .edit-slot input[type="file"]{
+    display:none;
+  }
+  .edit-slot-btn{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--parchment);
+    border:none;
+    padding:7px 6px;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .edit-slot-btn:hover{
+    background:var(--teal);
+  }
+  .edit-slot-btn.remove{
+    background:transparent;
+    color:var(--danger);
+    border:1px solid var(--danger);
+  }
+  .edit-slot-btn.remove:hover{
+    background:var(--danger);
+    color:#fff;
+  }
+  .edit-slot-wide{
+    grid-column:1 / -1;
+    align-items:stretch;
+    text-align:left;
+  }
+  .edit-extra-gallery{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    width:100%;
+  }
+  .edit-extra-gallery .placeholder{
+    font-size:11px;
+    color:var(--ink);
+    opacity:0.4;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .edit-extra-thumb{
+    position:relative;
+    width:64px;
+    height:64px;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid rgba(22,50,79,0.25);
+  }
+  .edit-extra-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .edit-extra-remove{
+    position:absolute;
+    top:2px; right:2px;
+    width:18px; height:18px;
+    line-height:16px;
+    padding:0;
+    border:none;
+    border-radius:50%;
+    background:rgba(0,0,0,0.65);
+    color:#fff;
+    font-size:11px;
+    cursor:pointer;
+  }
+  .edit-extra-add{
+    width:auto;
+    align-self:flex-start;
+  }
+  .edit-panel-note{
+    margin-top:16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--ink);
+    opacity:0.55;
+    line-height:1.6;
+  }
+  .edit-panel-tools{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+  }
+  .edit-tool-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:transparent;
+    border:1px solid rgba(22,50,79,0.35);
+    color:var(--ink);
+    padding:8px 12px;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .edit-tool-btn:hover{
+    border-color:var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    button.explore, .edit-toggle{transition:none;}
+  }
+
+  @media (max-width:560px){
+    .content{padding:26px 20px 22px;}
+    .content-top{flex-direction:column;}
+    .side-media{flex-direction:row; width:100%; flex:none; margin-top:0;}
+    .flag-box{flex:0 0 90px; height:70px;}
+    .landscape-frame{flex:1 1 auto; height:70px;}
+    .map-row{flex-direction:column;}
+    .extra-photos{flex-direction:row; flex-wrap:wrap; width:100%; flex:none;}
+    .extra-photo-frame{flex:1 1 140px; height:140px;}
+    .footer-row{padding:16px 20px 20px; flex-direction:column; align-items:stretch;}
+    .edit-panel{padding:20px;}
+    .edit-grid{grid-template-columns:1fr;}
+    .stamp{width:74px;height:74px;top:16px;right:16px;}
+    .stamp .day-num{font-size:19px;}
+    h1{max-width:100%;}
+    .coords{gap:16px;}
+    .masthead{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="title">Atlas Quotidien</div>
+    <div class="masthead-right">
+      <div class="date" id="today-date"></div>
+      <button class="edit-toggle" id="edit-toggle-btn">✏️ Mode édition</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stamp">
+      <div class="day-num" id="day-number">—</div>
+      <div class="day-label">du jour</div>
+    </div>
+
+    <div class="content">
+      <div class="content-top">
+        <div class="text-block">
+          <div class="eyebrow">Région du jour</div>
+          <h1 id="region-name">Chargement…</h1>
+          <div class="country-line">
+            <span id="region-country"></span>
+          </div>
+          <p class="desc" id="region-desc"></p>
+        </div>
+        <div class="side-media">
+          <div class="flag-box" id="flag-slot">
+            <span class="flag" id="region-flag"></span>
+            <div class="flag-caption">Drapeau</div>
+          </div>
+          <div class="landscape-frame" id="landscape-frame" style="display:none;">
+            <img id="landscape-img" alt="Paysage de la région">
+            <div class="landscape-caption" id="landscape-caption"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-row">
+        <div class="map-frame" id="map-frame">
+          <span class="map-placeholder">Aucune carte importée</span>
+        </div>
+
+        <div class="extra-photos" id="extra-photos"></div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div class="progress" id="region-index">Région — / —</div>
+      <button class="explore" id="explore-btn">Une autre région →</button>
+    </div>
+
+    <div class="edit-panel" id="edit-panel">
+      <div class="edit-panel-title" id="edit-panel-title">Importer des images — Région</div>
+      <div class="edit-grid">
+        <div class="edit-slot drop-single" data-type="map">
+          <div class="edit-slot-label">Carte</div>
+          <div class="edit-slot-preview" id="preview-map"><span class="placeholder">Aucune image</span></div>
+          <div class="edit-slot-buttons">
+            <label class="edit-slot-btn">Importer<input type="file" accept="image/*" data-type="map"></label>
+            <button class="edit-slot-btn remove" data-type="map">Retirer</button>
+          </div>
+        </div>
+        <div class="edit-slot drop-single" data-type="landscape">
+          <div class="edit-slot-label">Paysage</div>
+          <div class="edit-slot-preview" id="preview-landscape"><span class="placeholder">Aucune image</span></div>
+          <div class="edit-slot-buttons">
+            <label class="edit-slot-btn">Importer<input type="file" accept="image/*" data-type="landscape"></label>
+            <button class="edit-slot-btn remove" data-type="landscape">Retirer</button>
+          </div>
+        </div>
+        <div class="edit-slot drop-single" data-type="flag">
+          <div class="edit-slot-label">Drapeau</div>
+          <div class="edit-slot-preview" id="preview-flag"><span class="placeholder">Aucune image</span></div>
+          <div class="edit-slot-buttons">
+            <label class="edit-slot-btn">Importer<input type="file" accept="image/*" data-type="flag"></label>
+            <button class="edit-slot-btn remove" data-type="flag">Retirer</button>
+          </div>
+        </div>
+        <div class="edit-slot edit-slot-wide" id="extra-photo-drop">
+          <div class="edit-slot-label">Autres photos (facultatif) — glisser-déposer possible</div>
+          <div class="edit-extra-gallery" id="edit-extra-gallery"><span class="placeholder">Aucune photo supplémentaire</span></div>
+          <div class="edit-slot-buttons">
+            <label class="edit-slot-btn edit-extra-add">+ Ajouter une photo<input type="file" accept="image/*" id="extra-photo-input" multiple></label>
+          </div>
+        </div>
+      </div>
+      <div class="edit-panel-tools" style="flex-wrap:wrap;">
+        <button class="edit-tool-btn" id="export-site-btn" style="border-color:var(--brass); font-weight:600;">📦 Générer le site complet avec images</button>
+        <button class="edit-tool-btn" id="export-btn">Exporter les images seules (JSON)</button>
+        <label class="edit-tool-btn">Importer une sauvegarde JSON<input type="file" accept="application/json" id="import-input" style="display:none;"></label>
+      </div>
+      <div class="edit-panel-note">
+        Vos images sont envoyées en ligne (hébergement R2), donc légères à stocker : seule leur adresse est gardée dans ce navigateur. Le bouton « 📦 Générer le site complet avec images » crée un nouveau fichier HTML qui référence ces mêmes adresses : ce fichier s'affiche à l'identique partout (autre ordinateur, autre navigateur), tant qu'une connexion internet est disponible. Régénérez-le à chaque fois que vous ajoutez de nouvelles images.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="embedded-images-data">{}</script>
+<script>
+const REGIONS = [
+  {name:"Voronej", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:51.67, lon:39.21, zoom:7,
+    desc:"Région agricole du centre-sud de la Russie, Voronej borde la steppe et fut le berceau de la marine impériale russe fondée par Pierre le Grand à la fin du XVIIe siècle."},
+  {name:"Vologda", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:59.22, lon:39.90, zoom:6,
+    desc:"Région du nord russe couverte de forêts et de lacs, Vologda est réputée pour sa dentelle traditionnelle et son beurre, ainsi que pour ses églises en bois anciennes."},
+  {name:"Volgograd", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:48.71, lon:44.50, zoom:7,
+    desc:"Ancienne Stalingrad, cette région de la basse Volga fut le théâtre de l'une des batailles les plus meurtrières de la Seconde Guerre mondiale, marquée par l'immense statue de la Mère-Patrie."},
+  {name:"Vladimir", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:56.13, lon:40.41, zoom:7,
+    desc:"Cœur historique de la Russie médiévale, la région de Vladimir fait partie de l'Anneau d'or et abrite des cathédrales en pierre blanche classées à l'UNESCO datant du XIIe siècle."},
+  {name:"Oulianovsk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.31, lon:48.36, zoom:7,
+    desc:"Ville natale de Lénine sur les rives de la Volga, la région d'Oulianovsk conserve de nombreux lieux liés à l'histoire révolutionnaire soviétique."},
+  {name:"Tcheliabinsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:55.16, lon:61.40, zoom:7,
+    desc:"Région industrielle de l'Oural méridional, Tcheliabinsk a acquis une notoriété mondiale en 2013 lors de la chute d'un météore spectaculaire au-dessus de la ville."},
+  {name:"Toula", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.19, lon:37.62, zoom:7,
+    desc:"Traditionnellement liée à la fabrication d'armes et de samovars, la région de Toula abrite aussi Iasnaïa Poliana, le domaine où vécut et fut enterré Léon Tolstoï."},
+  {name:"Tver", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:56.86, lon:35.90, zoom:7,
+    desc:"Située entre Moscou et Saint-Pétersbourg sur les rives de la Volga naissante, la région de Tver fut une puissante principauté rivale de Moscou au Moyen Âge."},
+  {name:"Tomsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:56.48, lon:84.97, zoom:6,
+    desc:"Ville universitaire sibérienne fondée en 1604, Tomsk est réputée pour son architecture en bois ouvragé et son statut historique de centre intellectuel de la Sibérie."},
+  {name:"Khantys-Mansis", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:61.0, lon:69.0, zoom:5,
+    desc:"District autonome sibérien couvert de taïga et de marais, terre ancestrale des peuples khantys et mansis, il concentre une part majeure de la production pétrolière russe."},
+  {name:"Iamalie", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:66.5, lon:76.0, zoom:5,
+    desc:"District autonome arctique du grand nord sibérien, la Iamalie abrite les Nénètses éleveurs de rennes et d'immenses gisements de gaz naturel exploités jusqu'au cercle polaire."},
+  {name:"Tioumen", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:57.15, lon:65.53, zoom:6,
+    desc:"Première ville russe fondée en Sibérie en 1586, la région de Tioumen est aujourd'hui le cœur administratif de l'industrie pétrolière et gazière sibérienne."},
+  {name:"Tambov", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:52.72, lon:41.45, zoom:7,
+    desc:"Région agricole des terres noires du centre russe, Tambov fut le théâtre d'une importante révolte paysanne réprimée par l'Armée rouge au début des années 1920."},
+  {name:"Sverdlovsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:56.84, lon:60.61, zoom:7,
+    desc:"Centre industriel majeur de l'Oural autour d'Ekaterinbourg, cette région marque symboliquement la frontière entre Europe et Asie et fut le lieu d'exécution de la famille impériale en 1918."},
+  {name:"Smolensk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.78, lon:32.05, zoom:7,
+    desc:"Région frontalière de l'ouest russe traversée par le Dniepr, Smolensk a été le théâtre de batailles décisives lors des invasions napoléonienne et allemande."},
+  {name:"Saratov", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:51.53, lon:46.03, zoom:7,
+    desc:"Région de la moyenne Volga marquée par l'ancienne colonisation allemande de la Volga au XVIIIe siècle, Saratov est aussi liée à l'histoire spatiale, Youri Gagarine y ayant atterri en 1961."},
+  {name:"Samara", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:53.20, lon:50.15, zoom:7,
+    desc:"Grande courbe de la Volga entourée de collines, la région de Samara fut un centre secret de l'industrie spatiale et aéronautique soviétique pendant la guerre froide."},
+  {name:"Sakhaline", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:47.0, lon:142.7, zoom:6,
+    desc:"Longue île de l'extrême-orient russe face au Japon, Sakhaline a changé plusieurs fois de souveraineté et concentre aujourd'hui d'importants projets gaziers offshore."},
+  {name:"Rostov", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:47.23, lon:39.72, zoom:7,
+    desc:"Porte d'entrée du Caucase sur les rives du Don, la région de Rostov est le berceau historique des cosaques du Don, cavaliers traditionnels des steppes russes."},
+  {name:"Riazan", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.63, lon:39.74, zoom:7,
+    desc:"L'une des plus anciennes principautés de la Russie médiévale, la région de Riazan a conservé un riche kremlin et de vastes plaines agricoles bordant l'Oka."},
+  {name:"Pskov", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:57.82, lon:28.33, zoom:7,
+    desc:"Région frontalière nord-ouest riche en lacs, Pskov fut une puissante république marchande médiévale rivale de Novgorod, dotée d'un kremlin fortifié remarquable."},
+  {name:"Penza", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:53.20, lon:45.00, zoom:7,
+    desc:"Région agricole du centre-sud russe, Penza est connue pour ses terres noires fertiles et son patrimoine littéraire lié à plusieurs écrivains russes du XIXe siècle."},
+  {name:"Orel", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:52.97, lon:36.08, zoom:7,
+    desc:"Région des terres noires natale de l'écrivain Ivan Tourgueniev, Orel fut aussi un point charnière de la bataille de Koursk en 1943."},
+  {name:"Orenbourg", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:51.77, lon:55.10, zoom:6,
+    desc:"Région steppique chevauchant la frontière Europe-Asie, Orenbourg est réputée pour ses châles de duvet tricotés et sa position historique de porte vers l'Asie centrale."},
+  {name:"Omsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:54.99, lon:73.37, zoom:6,
+    desc:"Fondée comme forteresse cosaque au XVIIIe siècle, la région d'Omsk en Sibérie occidentale fut aussi le lieu de déportation de Dostoïevski, qui y purgea son bagne."},
+  {name:"Novossibirsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:55.03, lon:82.92, zoom:6,
+    desc:"Plus grande ville de Sibérie, Novossibirsk s'est développée autour du chemin de fer Transsibérien et abrite Akademgorodok, cité scientifique soviétique renommée."},
+  {name:"Novgorod", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:58.52, lon:31.28, zoom:7,
+    desc:"L'une des plus anciennes villes de Russie, Novgorod fut le centre d'une puissante république marchande médiévale dotée d'institutions démocratiques précoces, aujourd'hui classée à l'UNESCO."},
+  {name:"Nijni Novgorod", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:56.33, lon:44.00, zoom:7,
+    desc:"Confluent stratégique de la Volga et de l'Oka, Nijni Novgorod accueillait la plus grande foire commerciale de l'empire russe et reste un centre industriel majeur."},
+  {name:"Mourmansk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:68.97, lon:33.08, zoom:6,
+    desc:"Plus grande ville au monde située au-delà du cercle polaire arctique, Mourmansk reste libre de glace grâce au Gulf Stream et abrite la flotte russe de brise-glaces nucléaires."},
+  {name:"Moscou", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:55.75, lon:37.62, zoom:8,
+    desc:"Région entourant la capitale fédérale, l'oblast de Moscou concentre villages historiques, datchas et forêts qui ceinturent l'une des plus grandes métropoles d'Europe."},
+  {name:"Magadan", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:59.57, lon:150.80, zoom:5,
+    desc:"Région isolée de l'extrême-orient russe bordant la mer d'Okhotsk, Magadan fut au XXe siècle une porte d'entrée majeure vers les camps du Goulag de la Kolyma."},
+  {name:"Lipetsk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:52.61, lon:39.60, zoom:7,
+    desc:"Région industrielle des terres noires réputée pour sa métallurgie, Lipetsk possède aussi des sources minérales exploitées comme station thermale depuis l'époque de Pierre le Grand."},
+  {name:"Léningrad", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:59.57, lon:30.13, zoom:7,
+    desc:"Région entourant Saint-Pétersbourg sans en inclure la ville elle-même, l'oblast de Léningrad borde le golfe de Finlande et conserve de nombreux palais impériaux."},
+  {name:"Koursk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:51.73, lon:36.19, zoom:7,
+    desc:"Théâtre en 1943 de la plus grande bataille de chars de l'histoire, la région de Koursk repose sur l'une des plus importantes réserves de fer de la planète."},
+  {name:"Kourgan", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:55.45, lon:65.34, zoom:7,
+    desc:"Région agricole de Sibérie occidentale nommée d'après ses nombreux kourganes, tumulus funéraires anciens disséminés dans la steppe environnante."},
+  {name:"Kostroma", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:57.77, lon:40.93, zoom:7,
+    desc:"Ville de l'Anneau d'or berceau de la dynastie des Romanov, Kostroma est aussi historiquement liée à l'industrie du lin et à l'artisanat du bois."},
+  {name:"Kirov", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:58.60, lon:49.66, zoom:7,
+    desc:"Région boisée du nord-est européen de la Russie, Kirov est connue pour son artisanat de jouets en argile de Dymkovo et ses vastes forêts de conifères."},
+  {name:"Kemerovo-Kouzbass", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:55.35, lon:86.09, zoom:6,
+    desc:"Cœur industriel du bassin houiller du Kouzbass en Sibérie occidentale, cette région concentre l'essentiel de l'extraction de charbon de Russie."},
+  {name:"Kalouga", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.51, lon:36.26, zoom:7,
+    desc:"Région au sud-ouest de Moscou liée à l'histoire de la conquête spatiale grâce au savant autodidacte Constantin Tsiolkovski, pionnier de l'astronautique, qui y vécut."},
+  {name:"Kaliningrad", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:54.71, lon:20.51, zoom:8,
+    desc:"Enclave russe sur la Baltique séparée du reste du pays, l'ancienne Königsberg prussienne conserve un patrimoine architectural germanique et une industrie d'ambre réputée."},
+  {name:"Ivanovo", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:57.00, lon:40.97, zoom:7,
+    desc:"Surnommée « la ville des fiancées » pour son industrie textile historiquement employant surtout des femmes, Ivanovo fut un centre majeur du tissage et de l'impression de tissus russes."},
+  {name:"Bouriatie-Oust-Orda", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:52.8, lon:104.75, zoom:7,
+    desc:"Ancien district autonome bouriate aujourd'hui intégré à la région d'Irkoutsk, ce territoire conserve les traditions bouddhistes et chamaniques du peuple bouriate."},
+  {name:"Irkoutsk", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:52.29, lon:104.30, zoom:6,
+    desc:"Porte d'entrée historique vers le lac Baïkal, le plus profond et le plus ancien lac du monde, Irkoutsk fut aussi une ville d'exil pour les décembristes au XIXe siècle."},
+  {name:"Iaroslavl", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:57.63, lon:39.87, zoom:7,
+    desc:"Joyau de l'Anneau d'or fondé au XIe siècle sur la Volga, Iaroslavl abrite un centre historique classé à l'UNESCO orné d'églises aux dômes multicolores."},
+  {name:"Briansk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:53.24, lon:34.36, zoom:7,
+    desc:"Région frontalière boisée à la lisière de l'Ukraine et de la Biélorussie, Briansk fut un foyer majeur de la résistance partisane durant la Seconde Guerre mondiale."},
+  {name:"Belgorod", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:50.60, lon:36.59, zoom:7,
+    desc:"Région frontalière du sud-ouest bâtie sur les terres noires les plus fertiles de Russie, Belgorod fut le théâtre de combats majeurs lors de la bataille de Koursk en 1943."},
+  {name:"Astrakhan", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:46.35, lon:48.04, zoom:7,
+    desc:"Située dans le delta de la Volga avant la mer Caspienne, la région d'Astrakhan est réputée pour sa production de caviar et ses vastes champs de pastèques."},
+  {name:"Nénétsie", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:67.64, lon:53.0, zoom:5,
+    desc:"District autonome arctique peu peuplé bordant la mer de Barents, la Nénétsie est la terre ancestrale des Nénètses, éleveurs nomades de rennes de la toundra."},
+  {name:"Arkhangelsk", country:"Russie", continent:"Europe", flag:"🇷🇺", lat:64.54, lon:40.54, zoom:6,
+    desc:"Premier grand port maritime historique de la Russie fondé au XVIe siècle sur la mer Blanche, Arkhangelsk demeure une porte d'entrée vers l'Arctique russe."},
+  {name:"Oblast autonome juif", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:48.5, lon:132.9, zoom:6,
+    desc:"Créée en 1934 comme foyer national juif en Union soviétique, cette région de l'extrême-orient russe conserve un héritage yiddish encore visible dans sa capitale Birobidjan."},
+  {name:"Amour", country:"Russie", continent:"Asie", flag:"🇷🇺", lat:50.29, lon:127.53, zoom:6,
+    desc:"Région frontalière avec la Chine bordant le fleuve Amour, elle abrite le cosmodrome de Vostotchny, principal site de lancement spatial civil de la Russie."},
+];
+
+const EMBEDDED_STORE = (() => {
+  try{
+    const el = document.getElementById('embedded-images-data');
+    return el ? JSON.parse(el.textContent || '{}') : {};
+  }catch(e){
+    return {};
+  }
+})();
+
+const STORAGE_KEY = "atlas_region_images_v1";
+
+// ============================================================
+// CONFIG — URL de ton Cloudflare Worker (aucune clé secrète ici)
+// Même Worker / bucket R2 que SportShot, préfixe "regions/" pour
+// garder les fichiers séparés de ceux de SportShot ("photos/").
+// ============================================================
+const WORKER_URL    = 'https://sportshot-worker.thomas-plesse1.workers.dev';
+const R2_PUBLIC_URL = 'https://pub-860f841b121742d7900b605a0e34e215.r2.dev';
+const R2_PREFIX      = 'regions';
+// ============================================================
+
+// Upload une image vers R2 via le Worker Cloudflare (aucune clé exposée)
+async function uploadToR2(file){
+  const key = `${R2_PREFIX}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const res = await fetch(`${WORKER_URL}/${key}`, {
+    method: 'PUT',
+    headers: { 'content-type': file.type || 'application/octet-stream' },
+    body: file,
+  });
+  if(!res.ok) throw new Error(`Upload échoué : ${res.status}`);
+  return `${R2_PUBLIC_URL}/${key}`;
+}
+
+// Supprime une image de R2 via le Worker
+async function deleteFromR2(r2Url){
+  if(!r2Url || !r2Url.startsWith(R2_PUBLIC_URL)) return;
+  const key = r2Url.replace(R2_PUBLIC_URL + '/', '');
+  try{
+    await fetch(`${WORKER_URL}/${key}`, { method: 'DELETE' });
+  }catch(e){
+    console.error('Erreur suppression R2', e);
+  }
+}
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){
+    console.error("Erreur de lecture du stockage local", e);
+    return {};
+  }
+}
+function saveStore(store){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }catch(e){
+    alert("Impossible d'enregistrer l'image : le stockage local est plein ou indisponible. Essayez une image plus légère.");
+  }
+}
+function getRegionImages(name){
+  const local = loadStore()[name] || {};
+  const embedded = EMBEDDED_STORE[name] || {};
+  return Object.assign({}, embedded, local);
+}
+function setRegionImage(name, type, url){
+  const store = loadStore();
+  const previous = store[name] && store[name][type];
+  if(!store[name]) store[name] = {};
+  store[name][type] = url;
+  saveStore(store);
+  // Nettoie l'ancienne image sur R2 si elle y était hébergée
+  if(previous && previous !== url) deleteFromR2(previous);
+}
+function removeRegionImage(name, type){
+  const store = loadStore();
+  const previous = store[name] && store[name][type];
+  if(store[name]){
+    delete store[name][type];
+    if(Object.keys(store[name]).length === 0) delete store[name];
+  }
+  saveStore(store);
+  if(previous) deleteFromR2(previous);
+}
+function addRegionExtraImage(name, url){
+  const store = loadStore();
+  if(!store[name]) store[name] = {};
+  if(!Array.isArray(store[name].extra)) store[name].extra = [];
+  store[name].extra.push(url);
+  saveStore(store);
+}
+function removeRegionExtraImage(name, index){
+  const store = loadStore();
+  if(store[name] && Array.isArray(store[name].extra)){
+    const [removed] = store[name].extra.splice(index, 1);
+    if(store[name].extra.length === 0) delete store[name].extra;
+    if(Object.keys(store[name]).length === 0) delete store[name];
+    saveStore(store);
+    if(removed) deleteFromR2(removed);
+  }
+}
+
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  return Math.floor(diff / 86400000);
+}
+
+const now = new Date();
+document.getElementById('today-date').textContent =
+  now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+const doy = dayOfYear(now);
+let currentIndex = doy % REGIONS.length;
+let editMode = false;
+
+function renderMapFrame(region, images){
+  const frame = document.getElementById('map-frame');
+  if(images.map){
+    frame.innerHTML = `<img class="custom-map" src="${images.map}" alt="Carte de ${region.name}">`;
+  } else {
+    frame.innerHTML = `<span class="map-placeholder">Aucune carte importée</span>`;
+  }
+}
+
+function renderLandscape(region, images){
+  const frame = document.getElementById('landscape-frame');
+  const img = document.getElementById('landscape-img');
+  const caption = document.getElementById('landscape-caption');
+  if(images.landscape){
+    img.src = images.landscape;
+    caption.textContent = region.name + ", " + region.country;
+    frame.style.display = 'block';
+  } else {
+    frame.style.display = 'none';
+  }
+}
+
+function renderFlag(region, images){
+  const slot = document.getElementById('flag-slot');
+  if(images.flag){
+    slot.innerHTML = `<img class="flag-img" src="${images.flag}" alt="Drapeau">`;
+  } else {
+    slot.innerHTML = `<span class="flag">${region.flag}</span>`;
+  }
+  slot.insertAdjacentHTML('beforeend', '<div class="flag-caption">Drapeau</div>');
+}
+
+function renderExtraPhotos(region, images){
+  const container = document.getElementById('extra-photos');
+  const list = Array.isArray(images.extra) ? images.extra : [];
+  if(list.length === 0){
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = list.map(url => `
+    <div class="extra-photo-frame">
+      <img src="${url}" alt="${region.name}, ${region.country}">
+      <div class="extra-photo-caption">${region.name}, ${region.country}</div>
+    </div>
+  `).join('');
+}
+
+function renderEditExtraGallery(region, images){
+  const gallery = document.getElementById('edit-extra-gallery');
+  const list = Array.isArray(images.extra) ? images.extra : [];
+  if(list.length === 0){
+    gallery.innerHTML = `<span class="placeholder">Aucune photo supplémentaire</span>`;
+    return;
+  }
+  gallery.innerHTML = list.map((url, i) => `
+    <div class="edit-extra-thumb">
+      <img src="${url}" alt="Photo ${i+1}">
+      <button class="edit-extra-remove" data-index="${i}" title="Retirer">✕</button>
+    </div>
+  `).join('');
+  gallery.querySelectorAll('.edit-extra-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      removeRegionExtraImage(REGIONS[currentIndex].name, parseInt(btn.dataset.index, 10));
+      render(currentIndex);
+    });
+  });
+}
+
+function renderEditPanel(region, images){
+  document.getElementById('edit-panel-title').textContent = 'Importer des images — ' + region.name;
+  ['map','landscape','flag'].forEach(type => {
+    const preview = document.getElementById('preview-' + type);
+    if(images[type]){
+      preview.innerHTML = `<img src="${images[type]}" alt="${type}">`;
+    } else {
+      preview.innerHTML = `<span class="placeholder">Aucune image</span>`;
+    }
+  });
+  renderEditExtraGallery(region, images);
+}
+
+function render(index){
+  const r = REGIONS[index];
+  const images = getRegionImages(r.name);
+
+  document.getElementById('region-name').textContent = r.name;
+  document.getElementById('region-country').textContent = r.country;
+  document.getElementById('region-desc').textContent = r.desc;
+  document.getElementById('region-index').textContent = `Région ${index + 1} / ${REGIONS.length}`;
+  document.getElementById('day-number').textContent = doy;
+
+  renderFlag(r, images);
+  renderLandscape(r, images);
+  renderMapFrame(r, images);
+  renderExtraPhotos(r, images);
+  renderEditPanel(r, images);
+}
+
+document.getElementById('explore-btn').addEventListener('click', () => {
+  let next = currentIndex;
+  while(next === currentIndex){
+    next = Math.floor(Math.random() * REGIONS.length);
+  }
+  currentIndex = next;
+  render(currentIndex);
+});
+
+document.getElementById('edit-toggle-btn').addEventListener('click', function(){
+  editMode = !editMode;
+  this.classList.toggle('active', editMode);
+  this.textContent = editMode ? '✓ Édition active' : '✏️ Mode édition';
+  document.getElementById('edit-panel').classList.toggle('visible', editMode);
+});
+
+async function uploadToSlot(type, file, slot){
+  const preview = document.getElementById('preview-' + type);
+  const previousPreviewHTML = preview ? preview.innerHTML : '';
+
+  if(slot) slot.style.opacity = '0.6';
+  if(preview) preview.innerHTML = '<span class="placeholder">Envoi en cours…</span>';
+
+  try{
+    const url = await uploadToR2(file);
+    const region = REGIONS[currentIndex];
+    setRegionImage(region.name, type, url);
+    render(currentIndex);
+  }catch(err){
+    console.error(err);
+    alert("Échec de l'envoi de l'image : " + err.message);
+    if(preview) preview.innerHTML = previousPreviewHTML;
+  } finally {
+    if(slot) slot.style.opacity = '1';
+  }
+}
+
+async function uploadExtraPhoto(file, label){
+  if(label) label.style.opacity = '0.6';
+  try{
+    const url = await uploadToR2(file);
+    addRegionExtraImage(REGIONS[currentIndex].name, url);
+    render(currentIndex);
+  }catch(err){
+    console.error(err);
+    alert("Échec de l'envoi de l'image : " + err.message);
+  } finally {
+    if(label) label.style.opacity = '1';
+  }
+}
+
+document.querySelectorAll('.edit-slot input[type="file"]').forEach(input => {
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const type = input.dataset.type;
+    const slot = input.closest('.edit-slot');
+    await uploadToSlot(type, file, slot);
+    input.value = '';
+  });
+});
+
+document.querySelectorAll('.edit-slot.drop-single').forEach(slot => {
+  const type = slot.dataset.type;
+  ['dragenter','dragover'].forEach(evt => {
+    slot.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      slot.classList.add('drag-over');
+    });
+  });
+  ['dragleave','dragend'].forEach(evt => {
+    slot.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      slot.classList.remove('drag-over');
+    });
+  });
+  slot.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    slot.classList.remove('drag-over');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(!file || !file.type.startsWith('image/')) return;
+    await uploadToSlot(type, file, slot);
+  });
+});
+
+document.querySelectorAll('.edit-slot-btn.remove').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.type;
+    const region = REGIONS[currentIndex];
+    removeRegionImage(region.name, type);
+    render(currentIndex);
+  });
+});
+
+document.getElementById('extra-photo-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if(files.length === 0) return;
+  const label = e.target.closest('label');
+  for(const file of files){
+    await uploadExtraPhoto(file, label);
+  }
+  e.target.value = '';
+});
+
+const extraDropZone = document.getElementById('extra-photo-drop');
+if(extraDropZone){
+  ['dragenter','dragover'].forEach(evt => {
+    extraDropZone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      extraDropZone.classList.add('drag-over');
+    });
+  });
+  ['dragleave','dragend'].forEach(evt => {
+    extraDropZone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      extraDropZone.classList.remove('drag-over');
+    });
+  });
+  extraDropZone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    extraDropZone.classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files || []).filter(f => f.type.startsWith('image/'));
+    if(files.length === 0) return;
+    const label = extraDropZone.querySelector('.edit-extra-add');
+    for(const file of files){
+      await uploadExtraPhoto(file, label);
+    }
+  });
+}
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const store = loadStore();
+  const blob = new Blob([JSON.stringify(store)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'atlas-images-sauvegarde.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('export-site-btn').addEventListener('click', () => {
+  const local = loadStore();
+  const merged = {};
+  const allNames = new Set([...Object.keys(EMBEDDED_STORE), ...Object.keys(local)]);
+  allNames.forEach(name => {
+    merged[name] = Object.assign({}, EMBEDDED_STORE[name] || {}, local[name] || {});
+  });
+  const dataEl = document.getElementById('embedded-images-data');
+  const originalContent = dataEl.textContent;
+  dataEl.textContent = JSON.stringify(merged);
+
+  const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  dataEl.textContent = originalContent;
+
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'atlas-region-du-jour-complet.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Fichier généré et téléchargé. Ce nouveau fichier contient toutes vos images intégrées et peut être ouvert n'importe où.");
+});
+
+document.getElementById('import-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    const current = loadStore();
+    const merged = Object.assign({}, current, imported);
+    saveStore(merged);
+    render(currentIndex);
+    alert("Sauvegarde importée avec succès.");
+  }catch(err){
+    alert("Fichier de sauvegarde invalide.");
+  }
+  e.target.value = '';
+});
+
+render(currentIndex);
+</script>
+</body>
+</html>
