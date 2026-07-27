@@ -185,19 +185,6 @@
     object-fit:contain;
     display:block;
   }
-  .flag-bg{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    filter:blur(16px) brightness(0.85) saturate(1.1);
-    transform:scale(1.25);
-  }
-  .flag-box .flag-img{
-    position:relative;
-    z-index:1;
-  }
   .flag-caption{
     position:absolute;
     bottom:0; left:0; right:0;
@@ -297,17 +284,17 @@
 
   .extra-photos{
     display:flex;
-    flex-wrap:wrap;
+    flex-direction:column;
     gap:12px;
     margin-top:0;
   }
   .extra-photos:not(:empty){
-    margin-top:18px;
+    margin-top:12px;
   }
   .extra-photo-frame{
     position:relative;
-    flex:1 1 200px;
-    height:170px;
+    width:100%;
+    height:160px;
     border-radius:2px;
     overflow:hidden;
     border:1px solid rgba(22,50,79,0.25);
@@ -410,6 +397,32 @@
     color:var(--ink);
     margin-bottom:16px;
     opacity:0.8;
+  }
+  .edit-region-picker{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .edit-region-picker label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.7;
+  }
+  .edit-region-picker select{
+    font-family:'Source Serif 4', serif;
+    font-size:14px;
+    padding:6px 10px;
+    border:1px solid rgba(22,50,79,0.3);
+    border-radius:2px;
+    background:var(--parchment);
+    color:var(--ink);
+    min-width:220px;
+    max-width:100%;
   }
   .edit-grid{
     display:grid;
@@ -582,9 +595,11 @@
   @media (max-width:560px){
     .content{padding:26px 20px 22px;}
     .content-top{flex-direction:column;}
-    .side-media{flex-direction:row; width:100%; flex:none; margin-top:0;}
+    .side-media{flex-direction:row; flex-wrap:wrap; width:100%; flex:none; margin-top:0;}
     .flag-box{flex:0 0 90px; height:70px;}
     .landscape-frame{flex:1 1 auto; height:70px;}
+    .extra-photos{flex:1 1 100%; flex-direction:row; flex-wrap:wrap;}
+    .extra-photo-frame{flex:1 1 140px; height:120px;}
     .footer-row{padding:16px 20px 20px; flex-direction:column; align-items:stretch;}
     .edit-panel{padding:20px;}
     .edit-grid{grid-template-columns:1fr;}
@@ -631,14 +646,13 @@
             <img id="landscape-img" alt="Paysage de la région">
             <div class="landscape-caption" id="landscape-caption"></div>
           </div>
+          <div class="extra-photos" id="extra-photos"></div>
         </div>
       </div>
 
       <div class="map-frame" id="map-frame">
         <span class="map-placeholder">Aucune carte importée</span>
       </div>
-
-      <div class="extra-photos" id="extra-photos"></div>
     </div>
 
     <div class="footer-row">
@@ -648,6 +662,10 @@
 
     <div class="edit-panel" id="edit-panel">
       <div class="edit-panel-title" id="edit-panel-title">Importer des images — Région</div>
+      <div class="edit-region-picker">
+        <label for="region-select">Aller à la région :</label>
+        <select id="region-select"></select>
+      </div>
       <div class="edit-grid">
         <div class="edit-slot drop-single" data-type="map">
           <div class="edit-slot-label">Carte</div>
@@ -941,7 +959,7 @@ function renderLandscape(region, images){
 function renderFlag(region, images){
   const slot = document.getElementById('flag-slot');
   if(images.flag){
-    slot.innerHTML = `<img class="flag-bg" src="${images.flag}" alt="" aria-hidden="true"><img class="flag-img" src="${images.flag}" alt="Drapeau"><div class="flag-caption">Drapeau</div>`;
+    slot.innerHTML = `<img class="flag-img" src="${images.flag}" alt="Drapeau"><div class="flag-caption">Drapeau</div>`;
   } else {
     slot.innerHTML = `<span class="flag">${region.flag}</span>`;
   }
@@ -985,6 +1003,10 @@ function renderEditExtraGallery(region, images){
 
 function renderEditPanel(region, images){
   document.getElementById('edit-panel-title').textContent = 'Importer des images — ' + region.name;
+  const select = document.getElementById('region-select');
+  if(select && select.value !== String(currentIndex)){
+    select.value = String(currentIndex);
+  }
   ['map','landscape','flag'].forEach(type => {
     const preview = document.getElementById('preview-' + type);
     if(images[type]){
@@ -1022,7 +1044,17 @@ document.getElementById('explore-btn').addEventListener('click', () => {
   render(currentIndex);
 });
 
+const EDIT_PASSWORD = 'toto9194';
+
 document.getElementById('edit-toggle-btn').addEventListener('click', function(){
+  if(!editMode){
+    const pwd = prompt('Mot de passe pour accéder au mode édition :');
+    if(pwd === null) return;
+    if(pwd !== EDIT_PASSWORD){
+      alert('Mot de passe incorrect.');
+      return;
+    }
+  }
   editMode = !editMode;
   this.classList.toggle('active', editMode);
   this.textContent = editMode ? '✓ Édition active' : '✏️ Mode édition';
@@ -1201,6 +1233,17 @@ document.getElementById('import-input').addEventListener('change', async (e) => 
   }
   e.target.value = '';
 });
+
+const regionSelect = document.getElementById('region-select');
+if(regionSelect){
+  regionSelect.innerHTML = REGIONS.map((r, i) =>
+    `<option value="${i}">${r.name} — ${r.country}</option>`
+  ).join('');
+  regionSelect.addEventListener('change', () => {
+    currentIndex = parseInt(regionSelect.value, 10);
+    render(currentIndex);
+  });
+}
 
 render(currentIndex);
 </script>
