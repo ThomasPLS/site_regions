@@ -185,6 +185,19 @@
     object-fit:contain;
     display:block;
   }
+  .flag-bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:blur(16px) brightness(0.85) saturate(1.1);
+    transform:scale(1.25);
+  }
+  .flag-box .flag-img{
+    position:relative;
+    z-index:1;
+  }
   .flag-caption{
     position:absolute;
     bottom:0; left:0; right:0;
@@ -928,7 +941,7 @@ function renderLandscape(region, images){
 function renderFlag(region, images){
   const slot = document.getElementById('flag-slot');
   if(images.flag){
-    slot.innerHTML = `<img class="flag-img" src="${images.flag}" alt="Drapeau"><div class="flag-caption">Drapeau</div>`;
+    slot.innerHTML = `<img class="flag-bg" src="${images.flag}" alt="" aria-hidden="true"><img class="flag-img" src="${images.flag}" alt="Drapeau"><div class="flag-caption">Drapeau</div>`;
   } else {
     slot.innerHTML = `<span class="flag">${region.flag}</span>`;
   }
