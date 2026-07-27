@@ -282,26 +282,19 @@
     justify-content:center;
   }
 
-  .map-row{
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-  }
-  .map-row .map-frame{
-    flex:1 1 auto;
-    min-width:0;
-  }
   .extra-photos{
     display:flex;
-    flex-direction:column;
+    flex-wrap:wrap;
     gap:12px;
-    flex:0 0 190px;
-    width:190px;
+    margin-top:0;
+  }
+  .extra-photos:not(:empty){
+    margin-top:18px;
   }
   .extra-photo-frame{
     position:relative;
-    width:100%;
-    height:160px;
+    flex:1 1 200px;
+    height:170px;
     border-radius:2px;
     overflow:hidden;
     border:1px solid rgba(22,50,79,0.25);
@@ -579,9 +572,6 @@
     .side-media{flex-direction:row; width:100%; flex:none; margin-top:0;}
     .flag-box{flex:0 0 90px; height:70px;}
     .landscape-frame{flex:1 1 auto; height:70px;}
-    .map-row{flex-direction:column;}
-    .extra-photos{flex-direction:row; flex-wrap:wrap; width:100%; flex:none;}
-    .extra-photo-frame{flex:1 1 140px; height:140px;}
     .footer-row{padding:16px 20px 20px; flex-direction:column; align-items:stretch;}
     .edit-panel{padding:20px;}
     .edit-grid{grid-template-columns:1fr;}
@@ -623,7 +613,6 @@
         <div class="side-media">
           <div class="flag-box" id="flag-slot">
             <span class="flag" id="region-flag"></span>
-            <div class="flag-caption">Drapeau</div>
           </div>
           <div class="landscape-frame" id="landscape-frame" style="display:none;">
             <img id="landscape-img" alt="Paysage de la région">
@@ -632,13 +621,11 @@
         </div>
       </div>
 
-      <div class="map-row">
-        <div class="map-frame" id="map-frame">
-          <span class="map-placeholder">Aucune carte importée</span>
-        </div>
-
-        <div class="extra-photos" id="extra-photos"></div>
+      <div class="map-frame" id="map-frame">
+        <span class="map-placeholder">Aucune carte importée</span>
       </div>
+
+      <div class="extra-photos" id="extra-photos"></div>
     </div>
 
     <div class="footer-row">
@@ -941,11 +928,10 @@ function renderLandscape(region, images){
 function renderFlag(region, images){
   const slot = document.getElementById('flag-slot');
   if(images.flag){
-    slot.innerHTML = `<img class="flag-img" src="${images.flag}" alt="Drapeau">`;
+    slot.innerHTML = `<img class="flag-img" src="${images.flag}" alt="Drapeau"><div class="flag-caption">Drapeau</div>`;
   } else {
     slot.innerHTML = `<span class="flag">${region.flag}</span>`;
   }
-  slot.insertAdjacentHTML('beforeend', '<div class="flag-caption">Drapeau</div>');
 }
 
 function renderExtraPhotos(region, images){
